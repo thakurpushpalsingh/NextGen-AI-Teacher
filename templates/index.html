@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextGen AI Teacher</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2>⚡ NextGen AI</h2>
+
+        <button class="new-chat" onclick="newChat()">
+            + New Chat
+        </button>
+
+        <p class="side-title">LEARNING</p>
+
+        <div class="menu" onclick="newChat()">💬 AI Teacher</div>
+        <div class="menu" onclick="ask('Teach me Python from zero')">🐍 Learn Python</div>
+        <div class="menu" onclick="ask('Teach me Java from zero')">☕ Learn Java</div>
+        <div class="menu" onclick="ask('Teach me C and C++ from zero')">💻 Learn C / C++</div>
+        <div class="menu" onclick="ask('Teach me HTML and CSS from zero')">🌐 HTML & CSS</div>
+
+        <p class="footer">Your AI Programming Teacher</p>
+    </aside>
+
+    <main class="main">
+
+        <header>
+            NextGen AI Teacher <span>● Online</span>
+        </header>
+
+        <section class="welcome" id="welcome">
+            <div class="logo">⚡</div>
+
+            <h1>What can I help you learn?</h1>
+            <p>Your personal AI programming teacher.</p>
+
+            <div class="cards">
+                <button onclick="ask('Teach me Python from zero')">🐍 Learn Python</button>
+                <button onclick="ask('Teach me Java from zero')">☕ Learn Java</button>
+                <button onclick="ask('Teach me C programming')">💻 Learn C</button>
+                <button onclick="ask('Teach me HTML and CSS')">🌐 Learn HTML</button>
+            </div>
+        </section>
+
+        <section id="messages" class="messages"></section>
+
+        <div class="input-area">
+            <input id="question" placeholder="Ask anything about programming...">
+            <button onclick="sendMessage()">➤</button>
+        </div>
+
+        <p class="note">
+            NextGen AI Teacher can make mistakes. Verify important code.
+        </p>
+
+    </main>
+
+    <script src="/static/script.js"></script>
+
+</body>
+</html>
