@@ -14,9 +14,11 @@
 
 <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
 
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
+
         <h2>⚡ NextGen AI</h2>
 
         <button class="new-chat" onclick="newChat()">
@@ -29,21 +31,32 @@
         <div class="menu" onclick="ask('Teach me Python from zero')">🐍 Learn Python</div>
         <div class="menu" onclick="ask('Teach me Java from zero')">☕ Learn Java</div>
         <div class="menu" onclick="ask('Teach me C and C++ from zero')">💻 Learn C / C++</div>
-        <div class="menu" onclick="ask('Teach me HTML and CSS from zero')">🌐 HTML & CSS</div>
+        <div class="menu" onclick="ask('Teach me HTML and CSS from zero')">🌐 HTML &amp; CSS</div>
 
         <p class="footer">Your AI Programming Teacher</p>
+
     </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <main class="main">
 
         <header>
-            NextGen AI Teacher <span>● Online</span>
+            <button class="mobile-menu-btn" id="menuToggle" aria-label="Open menu">
+                ☰
+            </button>
+
+            NextGen AI Teacher
+
+            <span>● Online</span>
         </header>
 
         <section class="welcome" id="welcome">
+
             <div class="logo">⚡</div>
 
             <h1>What can I help you learn?</h1>
+
             <p>Your personal AI programming teacher.</p>
 
             <div class="cards">
@@ -52,13 +65,17 @@
                 <button onclick="ask('Teach me C programming')">💻 Learn C</button>
                 <button onclick="ask('Teach me HTML and CSS')">🌐 Learn HTML</button>
             </div>
+
         </section>
 
         <section id="messages" class="messages"></section>
 
         <div class="input-area">
+
             <input id="question" placeholder="Ask anything about programming...">
+
             <button onclick="sendMessage()">➤</button>
+
         </div>
 
         <p class="note">
@@ -69,15 +86,37 @@
 
     <script src="/static/script.js"></script>
 
-<script>
-if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js")
-            .then(() => console.log("NextGen AI Teacher App Ready!"))
-            .catch((error) => console.error("Service Worker Error:", error));
-    });
-}
-</script>
+    <script>
+        // Mobile Sidebar
+        const menuToggle = document.getElementById("menuToggle");
+        const sidebar = document.getElementById("sidebar");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+        function closeSidebar() {
+            sidebar.classList.remove("open");
+            sidebarOverlay.classList.remove("show");
+        }
+
+        menuToggle.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+            sidebarOverlay.classList.toggle("show");
+        });
+
+        sidebarOverlay.addEventListener("click", closeSidebar);
+
+        sidebar.querySelectorAll(".menu, .new-chat").forEach(item => {
+            item.addEventListener("click", closeSidebar);
+        });
+
+        // Service Worker
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("/service-worker.js")
+                    .then(() => console.log("NextGen AI Teacher App Ready!"))
+                    .catch((error) => console.error("Service Worker Error:", error));
+            });
+        }
+    </script>
 
 </body>
 </html>

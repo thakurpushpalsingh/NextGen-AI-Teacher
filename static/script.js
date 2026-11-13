@@ -1,4 +1,3 @@
-
 const N8N_CHAT_URL = "https://nextgen-ai-teacher.app.n8n.cloud/webhook/81d977a3-e575-4706-b000-d2228846d40f/chat";
 
 // Session ID
