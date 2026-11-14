@@ -22,11 +22,14 @@
         href="{{ url_for('static', filename='style.css') }}">
 
     <style>
+        /* ACCOUNT BUTTONS */
+
         .account-actions {
             margin-left: auto;
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-shrink: 0;
         }
 
         .account-btn {
@@ -37,6 +40,11 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .account-btn:hover {
+            background: #252d40;
         }
 
         .signup-btn {
@@ -44,10 +52,17 @@
             border: 1px solid #2563eb;
         }
 
+        .signup-btn:hover {
+            background: #1d4ed8;
+        }
+
         .account-name {
             color: #93c5fd;
             font-size: 13px;
+            white-space: nowrap;
         }
+
+        /* AUTH POPUP */
 
         .auth-overlay {
             display: none;
@@ -67,6 +82,8 @@
         .auth-box {
             width: 100%;
             max-width: 390px;
+            max-height: 90dvh;
+            overflow-y: auto;
             background: #151a27;
             border: 1px solid #30394d;
             border-radius: 16px;
@@ -88,6 +105,7 @@
 
         .auth-box h2 {
             margin-bottom: 8px;
+            padding-right: 20px;
         }
 
         .auth-subtitle {
@@ -168,18 +186,59 @@
             color: #86efac;
         }
 
-        @media (max-width: 600px) {
+        /* MOBILE ACCOUNT HEADER */
+
+        @media (max-width: 700px) {
+
+            header {
+                flex-wrap: nowrap;
+                padding: 10px;
+                gap: 7px;
+            }
+
+            header > strong {
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+            header .online-status {
+                font-size: 9px;
+                white-space: nowrap;
+                margin-left: auto;
+            }
+
             .account-actions {
+                margin-left: 0;
                 gap: 5px;
             }
 
             .account-btn {
                 padding: 8px 9px;
-                font-size: 12px;
+                font-size: 11px;
             }
 
             .account-name {
                 display: none;
+            }
+        }
+
+        @media (max-width: 380px) {
+
+            header > strong {
+                font-size: 11px;
+            }
+
+            header .online-status {
+                display: none;
+            }
+
+            .account-btn {
+                padding: 7px 8px;
+                font-size: 10px;
+            }
+
+            .auth-box {
+                padding: 22px 18px;
             }
         }
     </style>
@@ -187,11 +246,13 @@
 
 <body>
 
+    <!-- SIDEBAR -->
+
     <aside class="sidebar" id="sidebar">
 
         <h2>⚡ NextGen AI</h2>
 
-        <button class="new-chat" onclick="newChat()">
+        <button class="new-chat" onclick="newChat()" type="button">
             + New Chat
         </button>
 
@@ -219,11 +280,17 @@
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+    <!-- MAIN AREA -->
+
     <main class="main">
 
         <header>
 
-            <button class="mobile-menu-btn" id="menuToggle">
+            <button class="mobile-menu-btn"
+                id="menuToggle"
+                type="button"
+                aria-label="Open navigation menu"
+                aria-expanded="false">
                 ☰
             </button>
 
@@ -234,15 +301,19 @@
             <div class="account-actions">
 
                 {% if user_id %}
+
                     <span class="account-name">
                         Hi, {{ user_name }}
                     </span>
 
-                    <button class="account-btn" id="logoutBtn"
+                    <button class="account-btn"
+                        id="logoutBtn"
                         type="button">
                         Logout
                     </button>
+
                 {% else %}
+
                     <button class="account-btn"
                         type="button"
                         onclick="openAuth('login')">
@@ -254,11 +325,14 @@
                         onclick="openAuth('signup')">
                         Sign Up
                     </button>
+
                 {% endif %}
 
             </div>
 
         </header>
+
+        <!-- WELCOME SCREEN -->
 
         <section class="welcome" id="welcome">
 
@@ -279,24 +353,42 @@
 
         </section>
 
-        <section id="messages" class="messages" aria-live="polite"></section>
+        <!-- CHAT MESSAGES -->
+
+        <section id="messages"
+            class="messages"
+            aria-live="polite">
+        </section>
+
+        <!-- CHAT INPUT -->
 
         <div class="input-area">
 
-            <button type="button" onclick="startVoice()" title="Speak">
+            <button class="mic-btn"
+                type="button"
+                onclick="startVoice()"
+                title="Speak"
+                aria-label="Start voice input">
                 🎤
             </button>
 
             <input
                 id="question"
+                type="text"
                 placeholder="Ask anything about programming..."
-                autocomplete="off">
+                autocomplete="off"
+                aria-label="Ask your programming question">
 
-            <button type="button" onclick="sendMessage()">
+            <button type="button"
+                onclick="sendMessage()"
+                title="Send message"
+                aria-label="Send message">
                 ➤
             </button>
 
         </div>
+
+        <!-- VOICE CONTROLS -->
 
         <div class="voice-controls">
 
@@ -316,7 +408,6 @@
 
     </main>
 
-
     <!-- LOGIN / SIGNUP POPUP -->
 
     <div class="auth-overlay" id="authOverlay">
@@ -325,7 +416,10 @@
 
             <button class="auth-close"
                 type="button"
-                onclick="closeAuth()">×</button>
+                onclick="closeAuth()"
+                aria-label="Close popup">
+                ×
+            </button>
 
             <h2>⚡ NextGen AI Teacher</h2>
 
@@ -351,8 +445,7 @@
 
             </div>
 
-            <form class="auth-form active"
-                id="loginForm">
+            <form class="auth-form active" id="loginForm">
 
                 <input
                     type="email"
@@ -374,8 +467,7 @@
 
             </form>
 
-            <form class="auth-form"
-                id="signupForm">
+            <form class="auth-form" id="signupForm">
 
                 <input
                     type="text"
@@ -406,19 +498,20 @@
 
             </form>
 
-            <p class="auth-message" id="authMessage"
-                role="status" aria-live="polite"></p>
+            <p class="auth-message"
+                id="authMessage"
+                role="status"
+                aria-live="polite">
+            </p>
 
         </div>
 
     </div>
 
-
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 
     <script>
-
-        // Login and Signup popup
+        // LOGIN AND SIGNUP
 
         const authOverlay = document.getElementById("authOverlay");
         const authMessage = document.getElementById("authMessage");
@@ -523,6 +616,8 @@
 
             });
 
+        // LOGOUT
+
         const logoutBtn = document.getElementById("logoutBtn");
 
         if (logoutBtn) {
@@ -551,14 +646,15 @@
 
         }
 
+        // CLOSE AUTH POPUP ON BACKGROUND CLICK
+
         authOverlay.addEventListener("click", function(event) {
             if (event.target === authOverlay) {
                 closeAuth();
             }
         });
 
-
-        // Mobile Sidebar
+        // MOBILE SIDEBAR
 
         const menuToggle = document.getElementById("menuToggle");
         const sidebar = document.getElementById("sidebar");
@@ -567,11 +663,16 @@
         function closeSidebar() {
             sidebar.classList.remove("open");
             sidebarOverlay.classList.remove("show");
+            menuToggle.setAttribute("aria-expanded", "false");
         }
 
         menuToggle.addEventListener("click", () => {
-            sidebar.classList.toggle("open");
-            sidebarOverlay.classList.toggle("show");
+
+            const isOpen = sidebar.classList.toggle("open");
+
+            sidebarOverlay.classList.toggle("show", isOpen);
+            menuToggle.setAttribute("aria-expanded", String(isOpen));
+
         });
 
         sidebarOverlay.addEventListener("click", closeSidebar);
@@ -580,8 +681,18 @@
             item.addEventListener("click", closeSidebar);
         });
 
+        // ESCAPE KEY
 
-        // Service Worker
+        document.addEventListener("keydown", function(event) {
+
+            if (event.key === "Escape") {
+                closeSidebar();
+                closeAuth();
+            }
+
+        });
+
+        // SERVICE WORKER
 
         if ("serviceWorker" in navigator) {
 
@@ -594,7 +705,6 @@
             });
 
         }
-
     </script>
 
 </body>
