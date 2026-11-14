@@ -2,37 +2,63 @@
 "use strict";
 
 // ==================================================
-// NEXTGEN AI TEACHER - COMPLETE JAVASCRIPT
+// NEXTGEN AI TEACHER - IMPROVED JAVASCRIPT
 // ==================================================
 
-// Your existing n8n webhook
-const N8N_CHAT_URL = "https://nextgen-ai-teacher.app.n8n.cloud/webhook/81d977a3-e575-4706-b000-d2228846d40f/chat";
+// Existing n8n webhook
+const N8N_CHAT_URL =
+    "https://nextgen-ai-teacher.app.n8n.cloud/webhook/81d977a3-e575-4706-b000-d2228846d40f/chat";
 
-// Session Management
-let sessionId = localStorage.getItem("nextgen_session");
+// ==================================================
+// SESSION MANAGEMENT
+// ==================================================
 
-if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    localStorage.setItem("nextgen_session", sessionId);
+function createSessionId() {
+    if (crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+
+    return "session-" + Date.now() + "-" +
+        Math.random().toString(36).slice(2);
 }
 
-// Global States
+function getSessionId() {
+    try {
+        let id = localStorage.getItem("nextgen_session");
+
+        if (!id) {
+            id = createSessionId();
+            localStorage.setItem("nextgen_session", id);
+        }
+
+        return id;
+
+    } catch (error) {
+        console.error("Session storage error:", error);
+        return createSessionId();
+    }
+}
+
+let sessionId = getSessionId();
+
 let isSending = false;
 let currentUtterance = null;
 let recognition = null;
 
 
 // ==================================================
-// LOAD REQUIRED LIBRARIES AUTOMATICALLY
+// LOAD EXTERNAL LIBRARIES
 // ==================================================
 
 function loadExternalScript(src) {
     return new Promise((resolve, reject) => {
+
         const existing = [...document.scripts].find(
             script => script.src === src
         );
 
         if (existing) {
+
             if (existing.dataset.loaded === "true") {
                 resolve();
                 return;
@@ -40,10 +66,12 @@ function loadExternalScript(src) {
 
             existing.addEventListener("load", resolve, { once: true });
             existing.addEventListener("error", reject, { once: true });
+
             return;
         }
 
         const script = document.createElement("script");
+
         script.src = src;
         script.async = true;
 
@@ -60,6 +88,7 @@ function loadExternalScript(src) {
 
 async function loadMarkdownLibraries() {
     try {
+
         if (typeof marked === "undefined") {
             await loadExternalScript(
                 "https://cdn.jsdelivr.net/npm/marked/marked.min.js"
@@ -78,17 +107,20 @@ async function loadMarkdownLibraries() {
         );
 
     } catch (error) {
+
         console.error("Markdown library error:", error);
         return false;
+
     }
 }
 
 
 // ==================================================
-// AUTOMATIC DESIGN STYLING
+// EXTRA DESIGN STYLES
 // ==================================================
 
 function addTeacherStyles() {
+
     if (document.getElementById("nextgen-extra-styles")) return;
 
     const style = document.createElement("style");
@@ -100,6 +132,7 @@ function addTeacherStyles() {
             line-height: 1.75;
             overflow-wrap: anywhere;
             text-align: left;
+            min-width: 0;
         }
 
         .message.ai h1,
@@ -129,13 +162,15 @@ function addTeacherStyles() {
 
         .message.ai pre {
             position: relative;
+            max-width: 100%;
+            box-sizing: border-box;
             background: #080d18;
             border: 1px solid #29364b;
             border-radius: 10px;
-            padding: 16px;
-            padding-top: 45px;
+            padding: 45px 16px 16px;
             overflow-x: auto;
             margin: 14px 0;
+            white-space: pre;
         }
 
         .message.ai pre code {
@@ -144,6 +179,7 @@ function addTeacherStyles() {
             color: #e2e8f0;
             font-family: Consolas, monospace;
             font-size: 14px;
+            overflow-wrap: normal;
         }
 
         .message.ai :not(pre) > code {
@@ -178,10 +214,31 @@ function addTeacherStyles() {
             background: #2563eb;
         }
 
+        .nextgen-copy-btn:disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+
         .nextgen-status {
             font-size: 12px;
             color: #94a3b8;
             margin: 5px 0;
+        }
+
+        @media (max-width: 600px) {
+            .message.ai pre code {
+                font-size: 12px;
+            }
+
+            .message.ai pre {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .nextgen-copy-btn {
+                font-size: 11px;
+                padding: 5px 8px;
+            }
         }
     `;
 
@@ -194,13 +251,15 @@ function addTeacherStyles() {
 // ==================================================
 
 function cleanAnswer(answer) {
-    return String(answer)
+
+    return String(answer ?? "")
         .replace(/\\\*/g, "*")
         .replace(/\\_/g, "_")
         .replace(/\\#/g, "#")
         .replace(/\\`/g, "`")
         .replace(/&#x20;/gi, " ")
         .replace(/&nbsp;/gi, " ");
+
 }
 
 
@@ -209,6 +268,7 @@ function cleanAnswer(answer) {
 // ==================================================
 
 function renderMarkdown(text) {
+
     const cleaned = cleanAnswer(text);
 
     if (
@@ -218,12 +278,21 @@ function renderMarkdown(text) {
         return null;
     }
 
-    const html = marked.parse(cleaned, {
-        breaks: true,
-        gfm: true
-    });
+    try {
 
-    return DOMPurify.sanitize(html);
+        const html = marked.parse(cleaned, {
+            breaks: true,
+            gfm: true
+        });
+
+        return DOMPurify.sanitize(html);
+
+    } catch (error) {
+
+        console.error("Markdown rendering error:", error);
+        return null;
+
+    }
 }
 
 
@@ -232,13 +301,17 @@ function renderMarkdown(text) {
 // ==================================================
 
 function addMessage(text, sender) {
+
     const messages = document.getElementById("messages");
+
+    if (!messages) return null;
 
     const message = document.createElement("div");
 
     message.className = "message " + sender;
 
     if (sender === "ai") {
+
         const formatted = renderMarkdown(text);
 
         if (formatted !== null) {
@@ -249,10 +322,13 @@ function addMessage(text, sender) {
         }
 
     } else {
+
         message.textContent = text;
+
     }
 
     messages.appendChild(message);
+
     messages.scrollTop = messages.scrollHeight;
 
     return message;
@@ -260,11 +336,13 @@ function addMessage(text, sender) {
 
 
 // ==================================================
-// CODE COPY BUTTON
+// CODE COPY BUTTONS
 // ==================================================
 
 function addCodeCopyButtons(container) {
+
     container.querySelectorAll("pre").forEach(pre => {
+
         if (pre.querySelector(".nextgen-copy-btn")) return;
 
         const button = document.createElement("button");
@@ -274,26 +352,36 @@ function addCodeCopyButtons(container) {
         button.textContent = "Copy Code";
 
         button.addEventListener("click", async () => {
+
             const code = pre.querySelector("code");
 
             if (!code) return;
 
             try {
+
                 await navigator.clipboard.writeText(code.innerText);
+
                 button.textContent = "Copied!";
+                button.disabled = true;
 
                 setTimeout(() => {
                     button.textContent = "Copy Code";
+                    button.disabled = false;
                 }, 1500);
 
             } catch (error) {
+
                 console.error("Copy error:", error);
                 button.textContent = "Copy failed";
+
             }
+
         });
 
         pre.appendChild(button);
+
     });
+
 }
 
 
@@ -302,11 +390,15 @@ function addCodeCopyButtons(container) {
 // ==================================================
 
 function ask(question) {
+
     const input = document.getElementById("question");
+
+    if (!input) return;
 
     input.value = question;
 
     sendMessage();
+
 }
 
 
@@ -315,12 +407,15 @@ function ask(question) {
 // ==================================================
 
 function startVoice() {
+
     const SpeechRecognition =
         window.SpeechRecognition ||
         window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-        alert("Voice input ke liye Google Chrome use karo.");
+
+        alert("Voice input ke liye updated Google Chrome use karo.");
+
         return;
     }
 
@@ -330,7 +425,9 @@ function startVoice() {
 
     recognition = new SpeechRecognition();
 
+    // Hindi voice input
     recognition.lang = "hi-IN";
+
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -339,27 +436,42 @@ function startVoice() {
     };
 
     recognition.onresult = event => {
+
         const spokenText = event.results[0][0].transcript;
 
-        document.getElementById("question").value = spokenText;
+        const input = document.getElementById("question");
 
-        sendMessage();
+        if (input) {
+            input.value = spokenText;
+            sendMessage();
+        }
+
     };
 
     recognition.onerror = event => {
+
         console.error("Voice error:", event.error);
 
-        if (event.error !== "no-speech" &&
-            event.error !== "aborted") {
+        if (
+            event.error !== "no-speech" &&
+            event.error !== "aborted"
+        ) {
             alert("Voice input error: " + event.error);
         }
+
     };
 
     recognition.onend = () => {
         recognition = null;
     };
 
-    recognition.start();
+    try {
+        recognition.start();
+    } catch (error) {
+        console.error("Voice start error:", error);
+        recognition = null;
+    }
+
 }
 
 
@@ -368,9 +480,8 @@ function startVoice() {
 // ==================================================
 
 function speakAnswer(text) {
-    if (!("speechSynthesis" in window)) {
-        return;
-    }
+
+    if (!("speechSynthesis" in window)) return;
 
     window.speechSynthesis.cancel();
 
@@ -383,52 +494,80 @@ function speakAnswer(text) {
 
     currentUtterance = new SpeechSynthesisUtterance(plainText);
 
-    currentUtterance.lang = "hi-IN";
+    // Select language based on the response
+    currentUtterance.lang =
+        /[\u0900-\u097F]/.test(plainText)
+            ? "hi-IN"
+            : "en-IN";
+
     currentUtterance.rate = 0.95;
     currentUtterance.pitch = 1;
     currentUtterance.volume = 1;
 
     window.speechSynthesis.speak(currentUtterance);
+
 }
 
 
-// Pause Voice
+// ==================================================
+// PAUSE VOICE
+// ==================================================
+
 function pauseVoice() {
-    if (window.speechSynthesis.speaking) {
+
+    if (
+        "speechSynthesis" in window &&
+        window.speechSynthesis.speaking
+    ) {
         window.speechSynthesis.pause();
     }
+
 }
 
 
-// Resume Voice
+// ==================================================
+// RESUME VOICE
+// ==================================================
+
 function resumeVoice() {
-    if (window.speechSynthesis.paused) {
+
+    if (
+        "speechSynthesis" in window &&
+        window.speechSynthesis.paused
+    ) {
         window.speechSynthesis.resume();
     }
+
 }
 
 
-// Stop Voice
+// ==================================================
+// STOP VOICE
+// ==================================================
+
 function stopVoice() {
+
     if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
     }
 
     if (recognition) {
+
         recognition.abort();
         recognition = null;
+
     }
 
     currentUtterance = null;
+
 }
 
 
 // ==================================================
-// GET AI RESPONSE
+// EXTRACT AI RESPONSE
 // ==================================================
 
 function extractAnswer(data) {
-    let answer = null;
 
     if (Array.isArray(data) && data.length > 0) {
         data = data[0];
@@ -439,19 +578,52 @@ function extractAnswer(data) {
     }
 
     if (data && typeof data === "object") {
-        answer =
+
+        let answer =
             data.output ??
             data.text ??
             data.response ??
             data.message ??
             data.answer;
+
+        if (typeof answer === "object" && answer !== null) {
+            answer = JSON.stringify(answer, null, 2);
+        }
+
+        if (answer !== undefined && answer !== null) {
+            return String(answer);
+        }
+
     }
 
-    if (typeof answer === "object" && answer !== null) {
-        answer = JSON.stringify(answer, null, 2);
+    return "AI response nahi mila.";
+
+}
+
+
+// ==================================================
+// READ SERVER RESPONSE
+// ==================================================
+
+async function readServerResponse(response) {
+
+    const responseText = await response.text();
+
+    if (!responseText) {
+        throw new Error("Server ne empty response bheja.");
     }
 
-    return answer || "AI response nahi mila.";
+    try {
+
+        return JSON.parse(responseText);
+
+    } catch (error) {
+
+        // Also support plain text responses
+        return responseText;
+
+    }
+
 }
 
 
@@ -460,7 +632,12 @@ function extractAnswer(data) {
 // ==================================================
 
 async function sendMessage() {
+
     const input = document.getElementById("question");
+    const messages = document.getElementById("messages");
+    const welcome = document.getElementById("welcome");
+
+    if (!input || !messages) return;
 
     const question = input.value.trim();
 
@@ -472,11 +649,15 @@ async function sendMessage() {
         '.input-area button[onclick="sendMessage()"]'
     );
 
-    if (sendButton) sendButton.disabled = true;
+    if (sendButton) {
+        sendButton.disabled = true;
+    }
 
     stopVoice();
 
-    document.getElementById("welcome").style.display = "none";
+    if (welcome) {
+        welcome.style.display = "none";
+    }
 
     addMessage(question, "user");
 
@@ -485,7 +666,10 @@ async function sendMessage() {
     const thinking = addMessage("AI is thinking...", "ai");
 
     try {
+
+        // Preserve the existing n8n request structure
         const response = await fetch(N8N_CHAT_URL, {
+
             method: "POST",
 
             headers: {
@@ -496,50 +680,70 @@ async function sendMessage() {
                 chatInput: question,
                 sessionId: sessionId
             })
+
         });
 
         if (!response.ok) {
-            throw new Error("Server error " + response.status);
+
+            throw new Error(
+                "Server error: " + response.status
+            );
+
         }
 
-        const data = await response.json();
+        const data = await readServerResponse(response);
 
         const answer = extractAnswer(data);
 
-        // Load formatting libraries if needed
+        // Ensure formatting libraries are available
         await loadMarkdownLibraries();
 
         const formatted = renderMarkdown(answer);
 
-        if (formatted !== null) {
-            thinking.innerHTML = formatted;
-            addCodeCopyButtons(thinking);
-        } else {
-            thinking.textContent = cleanAnswer(answer);
-        }
+        if (thinking) {
 
-        // Automatically scroll to latest answer
-        const messages = document.getElementById("messages");
+            if (formatted !== null) {
+
+                thinking.innerHTML = formatted;
+                addCodeCopyButtons(thinking);
+
+            } else {
+
+                thinking.textContent = cleanAnswer(answer);
+
+            }
+
+        }
 
         messages.scrollTop = messages.scrollHeight;
 
-        // Speak AI response
+        // Speak response
         speakAnswer(answer);
 
     } catch (error) {
+
         console.error("AI Error:", error);
 
-        thinking.textContent =
-            "AI connection error: " + error.message;
+        if (thinking) {
+
+            thinking.textContent =
+                "AI connection error: " + error.message +
+                "\nPlease check your internet connection and n8n workflow.";
+
+        }
 
     } finally {
+
         isSending = false;
 
-        if (sendButton) sendButton.disabled = false;
+        if (sendButton) {
+            sendButton.disabled = false;
+        }
 
-        document.getElementById("messages").scrollTop =
-            document.getElementById("messages").scrollHeight;
+        messages.scrollTop = messages.scrollHeight;
+
     }
+
 }
 
 
@@ -548,17 +752,34 @@ async function sendMessage() {
 // ==================================================
 
 function newChat() {
+
     stopVoice();
 
-    document.getElementById("messages").innerHTML = "";
+    const messages = document.getElementById("messages");
+    const welcome = document.getElementById("welcome");
+    const input = document.getElementById("question");
 
-    document.getElementById("welcome").style.display = "block";
+    if (messages) {
+        messages.innerHTML = "";
+    }
 
-    document.getElementById("question").value = "";
+    if (welcome) {
+        welcome.style.display = "block";
+    }
 
-    sessionId = crypto.randomUUID();
+    if (input) {
+        input.value = "";
+        input.focus();
+    }
 
-    localStorage.setItem("nextgen_session", sessionId);
+    sessionId = createSessionId();
+
+    try {
+        localStorage.setItem("nextgen_session", sessionId);
+    } catch (error) {
+        console.error("Session storage error:", error);
+    }
+
 }
 
 
@@ -567,6 +788,7 @@ function newChat() {
 // ==================================================
 
 async function takeScreenshot() {
+
     const target = document.querySelector(".main");
 
     if (!target) {
@@ -575,16 +797,21 @@ async function takeScreenshot() {
     }
 
     try {
+
         if (typeof html2canvas === "undefined") {
+
             await loadExternalScript(
                 "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
             );
+
         }
 
         const canvas = await html2canvas(target, {
+
             backgroundColor: "#0b0d14",
             scale: 2,
             useCORS: true
+
         });
 
         const link = document.createElement("a");
@@ -596,10 +823,13 @@ async function takeScreenshot() {
         link.click();
 
     } catch (error) {
+
         console.error("Screenshot error:", error);
 
         alert("Screenshot nahi ban paya. Internet check karo.");
+
     }
+
 }
 
 
@@ -607,15 +837,23 @@ async function takeScreenshot() {
 // ENTER TO SEND
 // ==================================================
 
-document.getElementById("question").addEventListener(
-    "keydown",
-    event => {
+const questionInput = document.getElementById("question");
+
+if (questionInput) {
+
+    questionInput.addEventListener("keydown", event => {
+
         if (event.key === "Enter" && !event.shiftKey) {
+
             event.preventDefault();
+
             sendMessage();
+
         }
-    }
-);
+
+    });
+
+}
 
 
 // ==================================================
@@ -625,11 +863,13 @@ document.getElementById("question").addEventListener(
 addTeacherStyles();
 
 loadMarkdownLibraries().then(loaded => {
+
     console.log(
         loaded
             ? "NextGen Markdown Ready!"
             : "Markdown unavailable. Using plain text."
     );
+
 });
 
 console.log("NextGen AI Teacher JavaScript Loaded!");
