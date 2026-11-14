@@ -1,18 +1,188 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta name="google-site-verification" content="CFIZVEwLzJtqnkHpCuSIMiuJexypcaed52ZkWbNZzdg" />
-<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-<meta name="theme-color" content="#2563eb">
 
+<head>
+    <meta name="google-site-verification"
+        content="CFIZVEwLzJtqnkHpCuSIMiuJexypcaed52ZkWbNZzdg" />
+
+    <link rel="manifest"
+        href="{{ url_for('static', filename='manifest.json') }}">
+
+    <meta name="theme-color" content="#2563eb">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextGen AI Teacher - Learn Python, Java, C, C++ & HTML</title>
 
-<meta name="description" content="Learn Python, Java, C, C++ and HTML with NextGen AI Teacher. Ask coding questions and learn programming step by step with your AI programming tutor.">
+    <title>NextGen AI Teacher - Learn Programming</title>
 
-<link rel="stylesheet" href="/static/style.css">
+    <meta name="description"
+        content="Learn Python, Java, C, C++ and HTML with NextGen AI Teacher.">
+
+    <link rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .account-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .account-btn {
+            border: 1px solid #334155;
+            background: transparent;
+            color: white;
+            padding: 9px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .signup-btn {
+            background: #2563eb;
+            border: 1px solid #2563eb;
+        }
+
+        .account-name {
+            color: #93c5fd;
+            font-size: 13px;
+        }
+
+        .auth-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, .75);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .auth-overlay.show {
+            display: flex;
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 390px;
+            background: #151a27;
+            border: 1px solid #30394d;
+            border-radius: 16px;
+            padding: 26px;
+            color: white;
+            position: relative;
+        }
+
+        .auth-close {
+            position: absolute;
+            right: 15px;
+            top: 12px;
+            border: none;
+            background: transparent;
+            color: #aaa;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        .auth-box h2 {
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: #9ca3af;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #374151;
+            background: #202838;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .auth-tab.active {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            background: #0b0d14;
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .auth-form input:focus {
+            border-color: #3b82f6;
+        }
+
+        .auth-submit {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-submit:disabled {
+            opacity: .6;
+            cursor: wait;
+        }
+
+        .auth-message {
+            font-size: 13px;
+            margin-top: 14px;
+            min-height: 18px;
+            color: #fca5a5;
+        }
+
+        .auth-message.success {
+            color: #86efac;
+        }
+
+        @media (max-width: 600px) {
+            .account-actions {
+                gap: 5px;
+            }
+
+            .account-btn {
+                padding: 8px 9px;
+                font-size: 12px;
+            }
+
+            .account-name {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -33,6 +203,16 @@
         <div class="menu" onclick="ask('Teach me C and C++ from zero')">💻 Learn C / C++</div>
         <div class="menu" onclick="ask('Teach me HTML and CSS from zero')">🌐 HTML &amp; CSS</div>
 
+        <p class="side-title">AI TOOLS</p>
+
+        <div class="menu" onclick="ask('Explain this code line by line')">🧠 Code Explainer</div>
+        <div class="menu" onclick="ask('Help me debug my code')">🛠️ Code Debugger</div>
+        <div class="menu" onclick="ask('Create a programming quiz for me')">📝 AI Quiz</div>
+
+        <p class="side-title">VOICE LEARNING</p>
+
+        <div class="menu" onclick="startVoice()">🎤 Voice Teacher</div>
+
         <p class="footer">Your AI Programming Teacher</p>
 
     </aside>
@@ -42,13 +222,42 @@
     <main class="main">
 
         <header>
-            <button class="mobile-menu-btn" id="menuToggle" aria-label="Open menu">
+
+            <button class="mobile-menu-btn" id="menuToggle">
                 ☰
             </button>
 
-            NextGen AI Teacher
+            <strong>NextGen AI Teacher</strong>
 
-            <span>● Online</span>
+            <span class="online-status">● Online</span>
+
+            <div class="account-actions">
+
+                {% if user_id %}
+                    <span class="account-name">
+                        Hi, {{ user_name }}
+                    </span>
+
+                    <button class="account-btn" id="logoutBtn"
+                        type="button">
+                        Logout
+                    </button>
+                {% else %}
+                    <button class="account-btn"
+                        type="button"
+                        onclick="openAuth('login')">
+                        Login
+                    </button>
+
+                    <button class="account-btn signup-btn"
+                        type="button"
+                        onclick="openAuth('signup')">
+                        Sign Up
+                    </button>
+                {% endif %}
+
+            </div>
+
         </header>
 
         <section class="welcome" id="welcome">
@@ -60,21 +269,44 @@
             <p>Your personal AI programming teacher.</p>
 
             <div class="cards">
+
                 <button onclick="ask('Teach me Python from zero')">🐍 Learn Python</button>
                 <button onclick="ask('Teach me Java from zero')">☕ Learn Java</button>
                 <button onclick="ask('Teach me C programming')">💻 Learn C</button>
                 <button onclick="ask('Teach me HTML and CSS')">🌐 Learn HTML</button>
+
             </div>
 
         </section>
 
-        <section id="messages" class="messages"></section>
+        <section id="messages" class="messages" aria-live="polite"></section>
 
         <div class="input-area">
 
-            <input id="question" placeholder="Ask anything about programming...">
+            <button type="button" onclick="startVoice()" title="Speak">
+                🎤
+            </button>
 
-            <button onclick="sendMessage()">➤</button>
+            <input
+                id="question"
+                placeholder="Ask anything about programming..."
+                autocomplete="off">
+
+            <button type="button" onclick="sendMessage()">
+                ➤
+            </button>
+
+        </div>
+
+        <div class="voice-controls">
+
+            <button type="button" onclick="stopVoice()">
+                ⏹ Stop Voice
+            </button>
+
+            <button type="button" onclick="resumeVoice()">
+                🔊 Resume Voice
+            </button>
 
         </div>
 
@@ -84,10 +316,250 @@
 
     </main>
 
-    <script src="/static/script.js"></script>
+
+    <!-- LOGIN / SIGNUP POPUP -->
+
+    <div class="auth-overlay" id="authOverlay">
+
+        <div class="auth-box">
+
+            <button class="auth-close"
+                type="button"
+                onclick="closeAuth()">×</button>
+
+            <h2>⚡ NextGen AI Teacher</h2>
+
+            <p class="auth-subtitle">
+                Your personal programming learning account
+            </p>
+
+            <div class="auth-tabs">
+
+                <button class="auth-tab active"
+                    id="loginTab"
+                    type="button"
+                    onclick="switchAuth('login')">
+                    Login
+                </button>
+
+                <button class="auth-tab"
+                    id="signupTab"
+                    type="button"
+                    onclick="switchAuth('signup')">
+                    Sign Up
+                </button>
+
+            </div>
+
+            <form class="auth-form active"
+                id="loginForm">
+
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="Email address"
+                    autocomplete="email"
+                    required>
+
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required>
+
+                <button class="auth-submit" type="submit">
+                    Login to Account
+                </button>
+
+            </form>
+
+            <form class="auth-form"
+                id="signupForm">
+
+                <input
+                    type="text"
+                    id="signupName"
+                    placeholder="Your full name"
+                    maxlength="80"
+                    autocomplete="name"
+                    required>
+
+                <input
+                    type="email"
+                    id="signupEmail"
+                    placeholder="Email address"
+                    autocomplete="email"
+                    required>
+
+                <input
+                    type="password"
+                    id="signupPassword"
+                    placeholder="Create password (minimum 8 characters)"
+                    minlength="8"
+                    autocomplete="new-password"
+                    required>
+
+                <button class="auth-submit" type="submit">
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="auth-message" id="authMessage"
+                role="status" aria-live="polite"></p>
+
+        </div>
+
+    </div>
+
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
     <script>
+
+        // Login and Signup popup
+
+        const authOverlay = document.getElementById("authOverlay");
+        const authMessage = document.getElementById("authMessage");
+
+        function openAuth(type) {
+            authOverlay.classList.add("show");
+            switchAuth(type);
+        }
+
+        function closeAuth() {
+            authOverlay.classList.remove("show");
+            authMessage.textContent = "";
+            authMessage.classList.remove("success");
+        }
+
+        function switchAuth(type) {
+
+            const isLogin = type === "login";
+
+            document.getElementById("loginForm")
+                .classList.toggle("active", isLogin);
+
+            document.getElementById("signupForm")
+                .classList.toggle("active", !isLogin);
+
+            document.getElementById("loginTab")
+                .classList.toggle("active", isLogin);
+
+            document.getElementById("signupTab")
+                .classList.toggle("active", !isLogin);
+
+            authMessage.textContent = "";
+            authMessage.classList.remove("success");
+        }
+
+        async function sendAuthRequest(url, data) {
+
+            authMessage.textContent = "Please wait...";
+            authMessage.classList.remove("success");
+
+            const activeForm = document.querySelector(".auth-form.active");
+            const submitButton = activeForm.querySelector("button[type='submit']");
+
+            submitButton.disabled = true;
+
+            try {
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Something went wrong.");
+                }
+
+                authMessage.textContent = result.message;
+                authMessage.classList.add("success");
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 800);
+
+            } catch (error) {
+
+                authMessage.textContent = error.message;
+
+            } finally {
+
+                submitButton.disabled = false;
+
+            }
+        }
+
+        document.getElementById("signupForm")
+            .addEventListener("submit", function(event) {
+
+                event.preventDefault();
+
+                sendAuthRequest("/api/signup", {
+                    name: document.getElementById("signupName").value,
+                    email: document.getElementById("signupEmail").value,
+                    password: document.getElementById("signupPassword").value
+                });
+
+            });
+
+        document.getElementById("loginForm")
+            .addEventListener("submit", function(event) {
+
+                event.preventDefault();
+
+                sendAuthRequest("/api/login", {
+                    email: document.getElementById("loginEmail").value,
+                    password: document.getElementById("loginPassword").value
+                });
+
+            });
+
+        const logoutBtn = document.getElementById("logoutBtn");
+
+        if (logoutBtn) {
+
+            logoutBtn.addEventListener("click", async function() {
+
+                try {
+
+                    const response = await fetch("/api/logout", {
+                        method: "POST"
+                    });
+
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Logout nahi ho paya. Dobara try karein.");
+                    }
+
+                } catch (error) {
+
+                    alert("Internet connection check karein.");
+
+                }
+
+            });
+
+        }
+
+        authOverlay.addEventListener("click", function(event) {
+            if (event.target === authOverlay) {
+                closeAuth();
+            }
+        });
+
+
         // Mobile Sidebar
+
         const menuToggle = document.getElementById("menuToggle");
         const sidebar = document.getElementById("sidebar");
         const sidebarOverlay = document.getElementById("sidebarOverlay");
@@ -108,14 +580,21 @@
             item.addEventListener("click", closeSidebar);
         });
 
+
         // Service Worker
+
         if ("serviceWorker" in navigator) {
+
             window.addEventListener("load", () => {
+
                 navigator.serviceWorker.register("/service-worker.js")
                     .then(() => console.log("NextGen AI Teacher App Ready!"))
-                    .catch((error) => console.error("Service Worker Error:", error));
+                    .catch(error => console.error("Service Worker Error:", error));
+
             });
+
         }
+
     </script>
 
 </body>
